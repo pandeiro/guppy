@@ -78,7 +78,11 @@
         (assoc-in [:ts] (.getTime (js/Date.)))))
     doc))
 
-(defn updater [id path value]
+(defn updater
+  "Updates a map 'in place' within a sequence according to the
+  id and path, sticking value there. Creates the map if one
+  with that particular id doesn't already exist."
+  [id path value]
   (fn [state]
     (merge state
       {:data 
