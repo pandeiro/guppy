@@ -14,7 +14,7 @@
 
 (def handler
   (-> base
-    file-util/wrap-file-info
+    (file-util/wrap-file-info {"html" "text/html;charset=UTF-8"})
     (webjars/wrap-webjars ["vendor"])
     (refresh/wrap-refresh ["app"])))
 
