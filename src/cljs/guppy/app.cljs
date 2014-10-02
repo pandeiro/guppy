@@ -66,7 +66,7 @@
   (fn [state]
     (merge state
       {:data 
-       (if (doc-by-id (:data state) id)
+       (if (u/doc-by-id (:data state) id)
          (map (partial replace-doc id path value)
            (:data state))
          (conj (:data state)
@@ -85,11 +85,11 @@
      [:h3
       {:content-editable true
        :placeholder "name"
-       :on-key-up   #(update-doc! id [:name] (headline-content %))}
+       :on-key-up   #(update-doc! id [:name] (u/headline-content %))}
       (or (not-empty (:name doc)) "untitled")]
      [:textarea
       {:placeholder "Document text goes here..."
-       :on-change   #(update-doc! id [:text] (event-content %))}
+       :on-change   #(update-doc! id [:text] (u/event-content %))}
       (:text doc)]]))
 
 (defn init
