@@ -8,5 +8,6 @@
       (.setItem js/localStorage storage-key (pr-str (:new data))))))
 
 (defn restore! [r]
-  (when-let [data (not-empty (.getItem js/localStorage (name (:name @app-state))))]
-    (swap! r assoc-in [:data] (read-string data))))
+  (let [storage-key (name (:name @r))]
+    (when-let [data (not-empty (.getItem js/localStorage storage-key))]
+      (swap! r assoc-in [:data] (read-string data)))))
