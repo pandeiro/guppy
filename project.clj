@@ -37,8 +37,10 @@
              :compiler     {:output-to        "dist/app.js"
                             :optimizations    :advanced
                             :pretty-print     false
-                            :externs          ["react.js"]
-                            :preamble         ["react.min.js"]
+                            :externs          ["react.js"
+                                               "showdown.min.js"]
+                            :preamble         ["react.min.js"
+                                               "showdown.min.js"]
                             :closure-warnings {:externs-validation :off
                                                :non-standard-jsdoc :off}}}]}
 

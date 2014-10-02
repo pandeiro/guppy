@@ -8,6 +8,8 @@
             [weasel.repl :as repl]
             [guppy.history :as history]
             [guppy.local :as local]
+            [guppy.markdown :as markdown]
+            [guppy.dangerous :as dangerous]
             [guppy.util :as u]))
 
 (repl/connect "ws://localhost:9001" :verbose true)
@@ -78,19 +80,40 @@
 
 
 (defn document-view [state]
-  (let [id   (u/document-id-from-token (history/current-token))
-        doc  (u/doc-by-id (:data @state) id)]
-    [:div
-     [:p (pr-str doc)]
-     [:h3
-      {:content-editable true
-       :placeholder "name"
-       :on-key-up   #(update-doc! id [:name] (u/headline-content %))}
-      (or (not-empty (:name doc)) "untitled")]
-     [:textarea
-      {:placeholder "Document text goes here..."
-       :on-change   #(update-doc! id [:text] (u/event-content %))}
-      (:text doc)]]))
+  (let [options (r/atom {:view :edit})
+        change-view (fn [k]
+                      [:button
+                       {:on-click (fn [e] (swap! options assoc :view k))
+                        :class (if (= k (:view @options)) "active")}
+                       (name k)])]
+    (fn []
+      (let [id   (u/document-id-from-token (history/current-token))
+            doc  (u/doc-by-id (:data @state) id)]
+        [:div
+         [:div
+          (change-view :raw)
+          (change-view :edit)
+          (change-view :render)]
+
+         (case (:view @options)
+           :raw    [:div
+                    [:p (pr-str doc)]]
+
+           :edit   [:div
+                    [:h3
+                     {:content-editable true
+                      :placeholder "name"
+                      :on-key-up   #(update-doc! id [:name] (u/headline-content %))}
+                     (or (not-empty (:name doc)) "untitled")]
+                    [:textarea
+                     {:placeholder "Document text goes here..."
+                      :on-change   #(update-doc! id [:text] (u/event-content %))}
+                     (:text doc)]]
+
+           :render  (dangerous/live-dangerously
+                     [:div
+                      ^:danger
+                      [:div (markdown/to-html (:text doc))]]))]))))
 
 (defn init
   "A single entrypoint for the application"
