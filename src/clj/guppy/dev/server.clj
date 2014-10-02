@@ -12,19 +12,9 @@
 
 (webjars/refresh-assets!)
 
-(defn wrap-content-type [handler]
-  (fn [req]
-    (println "wrap-content-type" (:uri req))
-    (if (= "/" (:uri req))
-      (let [utf-8-req (resp-util/content-type req "text/html;charset=UTF-8")]
-        (println utf-8-req)
-        (handler utf-8-req))
-      (handler req))))
-
 (def handler
   (-> base
     file-util/wrap-file-info
-    wrap-content-type
     (webjars/wrap-webjars ["vendor"])
     (refresh/wrap-refresh ["app"])))
 
