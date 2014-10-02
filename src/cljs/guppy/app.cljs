@@ -35,9 +35,7 @@
 
 (defn sync! [k r o n]
   (let [data {:old (:data o) :new (:data n)}]
-    (.log js/console "sync!")
     (when (not= (:old data) (:new data))
-      (.log js/console "sync! detected new data")
       (.setItem js/localStorage (name (:name @app-state)) (pr-str (:new data))))))
 
 (add-watch app-state :data-store sync!)
@@ -67,16 +65,12 @@
       [:li [:a {:href (str "#/doc/" (:id doc))} (:name doc)]])]])
 
 (defn doc-by-id [data id]
-  (.log js/console "doc-by-id" id)
   (let [x (first (filter #(= (:id %) id) data))]
-    (.log js/console (pr-str x))
     x))
 
 (defn replace-doc [id path value doc]
-  (.log js/console "replace-doc doc id: " (:id doc))
   (if (= id (:id doc))
     (do
-      (.log js/console (str "got an update-doc match for id " id))
       (-> doc
         (assoc-in path value)
         (assoc-in [:ts] (.getTime (js/Date.)))))
@@ -122,7 +116,6 @@
   []
   (let [root   (.getElementById js/document "root")
         render (fn [view]
-                 (.log js/console "rendering view" view)
                  (render-component [view app-state] root))]
 
     (restore!)
@@ -131,16 +124,7 @@
           (let [token (<! history/navigation)]
             (condp re-find token
               #"/doc/.+" (render document-view)
-              #".*"      (render list-view)
-              (.log js/console "got a token but not matching")))))
-
-    ;; (let [token (not-empty (current-token))]
-    ;;   (.log js/console (str "init saw token " token))
-    ;;   (if token
-    ;;     (set-token! token)
-    ;;     (set-token! "/")))
-
-))
+              #".*"      (render list-view)))))))
 
 (.addEventListener js/window "DOMContentLoaded" init)
 
