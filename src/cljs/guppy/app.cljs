@@ -25,14 +25,10 @@
             :del  false
             :ts   1412200223710}]}))
 
-
-
 (add-watch app-state :data-store local/sync!)
 
-
-
 (defn new-document [& [{:keys [id name text]}]]
-  {:id   (or id (random-id))
+  {:id   (or id (u/random-id))
    :name (or name "")
    :text (or text "")
    :del  false
@@ -45,7 +41,7 @@
   [:div
    [:button
     {:on-click (fn [e]
-                 (let [id (random-id)]
+                 (let [id (u/random-id)]
                    (history/set-token! (str "/doc/" id))))}
     "+"]
    [:ol
@@ -53,9 +49,7 @@
       ^{:key (:id doc)}
       [:li [:a {:href (str "#/doc/" (:id doc))} (:name doc)]])]])
 
-(defn doc-by-id [data id]
-  (let [x (first (filter #(= (:id %) id) data))]
-    x))
+
 
 (defn replace-doc [id path value doc]
   (if (= id (:id doc))
@@ -84,8 +78,8 @@
 
 
 (defn document-view [state]
-  (let [id   (document-id-from-token (history/current-token))
-        doc  (doc-by-id (:data @state) id)]
+  (let [id   (u/document-id-from-token (history/current-token))
+        doc  (u/doc-by-id (:data @state) id)]
     [:div
      [:p (pr-str doc)]
      [:h3
