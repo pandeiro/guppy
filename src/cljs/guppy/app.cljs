@@ -9,6 +9,7 @@
             [guppy.history :as history]
             [guppy.local :as local]
             [guppy.markdown :as markdown]
+            [guppy.media :as media]
             [guppy.dangerous :as dangerous]
             [guppy.util :as u]))
 
@@ -46,6 +47,9 @@
                  (let [id (u/random-id)]
                    (history/set-token! (str "/doc/" id))))}
     "+"]
+   [:button
+    {:on-click (fn [e] (history/set-token! "/video"))}
+    "cam"]
    [:ol
     (for [doc (reverse (sort-by :ts (:data @state)))]
       ^{:key (:id doc)}
@@ -101,8 +105,10 @@
           (change-view :render)]
 
          (case (:view @options)
-           :raw    [:div
-                    [:p (pr-str doc)]]
+           :raw    (with-meta
+                     [:div
+                      [:p (pr-str doc)]]
+                     {:component-did-mount #(.log js/console "got a raw deal")})
 
            :edit   [:div
                     [:h3
@@ -118,6 +124,29 @@
            :render (dangerous/live-dangerously
                     ^:danger [:div (markdown/to-html (:text doc))]))]))))
 
+(def sources (r/atom []))
+
+(defn video-view []
+  (let []
+    (fn []
+      [:div
+       [:p "Sources"]
+       [:span
+        (pr-str @sources)]
+       [:p "Video"]
+       [:video {:auto-play true}]])))
+
+(defn load-video [this]
+  (let [video (.querySelector (r/dom-node this) "video")]
+    (media/get-sources (fn [items]
+                         (swap! sources conj (media/get-source :environment items))))
+    (.webkitGetUserMedia js/navigator
+     media/hd-constraints
+     (fn [stream]
+       (set! (.-src video) (media/object-url stream)))
+     (fn [error]
+       ))))
+
 (defn init
   "A single entrypoint for the application"
   []
@@ -131,6 +160,8 @@
           (let [token (<! history/navigation)]
             (condp re-find token
               #"/doc/.+" (render document-view)
+              #"/video"  (render (with-meta video-view
+                                   {:component-did-mount load-video}))
               #".*"      (render list-view)))))
 
     (.locale js/moment "pt-br")
