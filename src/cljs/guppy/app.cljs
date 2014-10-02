@@ -72,10 +72,9 @@
 
 (defn replace-doc [id path value doc]
   (if (= id (:id doc))
-    (do
-      (-> doc
-        (assoc-in path value)
-        (assoc-in [:ts] (.getTime (js/Date.)))))
+    (-> doc
+      (assoc-in path value)
+      (assoc-in [:ts] (.getTime (js/Date.))))
     doc))
 
 (defn updater
