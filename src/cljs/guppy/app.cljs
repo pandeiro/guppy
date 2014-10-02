@@ -47,9 +47,14 @@
                    (history/set-token! (str "/doc/" id))))}
     "+"]
    [:ol
-    (for [doc (:data @state)]
+    (for [doc (reverse (sort-by :ts (:data @state)))]
       ^{:key (:id doc)}
-      [:li [:a {:href (str "#/doc/" (:id doc))} (:name doc)]])]])
+      [:li
+       [:a
+        {:href (str "#/doc/" (:id doc))}
+        [:span (.fromNow (js/moment (:ts doc)))]
+        " - "
+        [:span [:strong (:name doc)]]]])]])
 
 
 
@@ -128,7 +133,10 @@
           (let [token (<! history/navigation)]
             (condp re-find token
               #"/doc/.+" (render document-view)
-              #".*"      (render list-view)))))))
+              #".*"      (render list-view)))))
+
+    (.locale js/moment "pt-br")
+    ))
 
 (.addEventListener js/window "DOMContentLoaded" init)
 
