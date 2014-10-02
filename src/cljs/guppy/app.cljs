@@ -57,7 +57,9 @@
 (defn list-view [state]
   [:div
    [:button
-    {:on-click #(js/alert "hi")}
+    {:on-click (fn [e]
+                 (let [id (random-id)]
+                   (history/set-token! (str "/doc/" id))))}
     "+"]
    [:ol
     (for [doc (:data @state)]
