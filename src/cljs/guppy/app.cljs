@@ -96,6 +96,7 @@
 (defn update-doc! [id path value]
   (swap! app-state (updater id path value)))
 
+
 (defn document-view [state]
   (let [id   (document-id-from-token (history/current-token))
         doc  (doc-by-id (:data @state) id)]
@@ -104,17 +105,11 @@
      [:h3
       {:content-editable true
        :placeholder "name"
-       :on-key-up   (fn [e]
-                      (update-doc!
-                       id [:name]
-                       (.-textContent (.-target e))))}
+       :on-key-up   #(update-doc! id [:name] (headline-content %))}
       (or (not-empty (:name doc)) "untitled")]
      [:textarea
       {:placeholder "Document text goes here..."
-       :on-change   (fn [e]
-                      (update-doc!
-                       id [:text]
-                       (.-value (.-target e))))}
+       :on-change   #(update-doc! id [:text] (event-content %))}
       (:text doc)]]))
 
 (defn init
