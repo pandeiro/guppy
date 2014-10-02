@@ -1,0 +1,16 @@
+*/target
+/app/out
+/app/guppy.js
+/dist
+/target
+/classes
+/checkouts
+pom.xml
+pom.xml.asc
+config.edn
+*.jar
+*.class
+/.lein-*
+/.nrepl-port
+/.repl
+/out
