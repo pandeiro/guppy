@@ -1,32 +1,20 @@
 (ns guppy.app
   (:require-macros [cljs.core.async.macros :refer [go]]
                    [guppy.config :refer [resolve-config]])
-  (:require [goog.history.EventType :as EventType]
-            [goog.events :as ev]
+  (:require [goog.events :as ev]
             [cljs.core.async :as async :refer [chan put! <! >!]]
             [cljs.reader :refer [read-string]]
             [reagent.core :as r :refer [render-component]]
-            [weasel.repl :as repl])
-  (:import goog.history.Html5History))
+            [weasel.repl :as repl]
+            [guppy.history :as history]))
 
 (repl/connect "ws://localhost:9001" :verbose true)
 
-(def history (Html5History.))
-(.setPathPrefix history "")
-(.setEnabled history true)
-
-(def navigation (chan))
-
-(ev/listen history EventType/NAVIGATE (fn [e] (put! navigation (.-token e))))
-
-(defn current-token [] (.getToken history))
-
-(defn set-token! [token] (.setToken history token))
 
 (defn document-id-from-token [token]
   (second (re-find #"/doc/(.+)" token)))
 
-(ev/listen js/window "load" (fn [e] (put! navigation (current-token))))
+
 
 
 (defn random-id []
@@ -109,7 +97,7 @@
   (swap! app-state (updater id path value)))
 
 (defn document-view [state]
-  (let [id   (document-id-from-token (current-token))
+  (let [id   (document-id-from-token (history/current-token))
         doc  (doc-by-id (:data @state) id)]
     [:div
      [:p (pr-str doc)]
@@ -140,7 +128,7 @@
     (restore!)
 
     (go (while true
-          (let [token (<! navigation)]
+          (let [token (<! history/navigation)]
             (condp re-find token
               #"/doc/.+" (render document-view)
               #".*"      (render list-view)
