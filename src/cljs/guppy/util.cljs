@@ -12,3 +12,8 @@
 (defn document-id-from-token [token]
   (second (re-find #"/doc/(.+)" token)))
 
+(defn doc-by-id
+  "Return a map from a seq based on :id"
+  [data id]
+  (let [x (first (filter #(= (:id %) id) data))]
+    x))
