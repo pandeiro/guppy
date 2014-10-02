@@ -6,19 +6,11 @@
             [cljs.reader :refer [read-string]]
             [reagent.core :as r :refer [render-component]]
             [weasel.repl :as repl]
-            [guppy.history :as history]))
+            [guppy.history :as history]
+            [guppy.local :as local]
+            [guppy.util :as u]))
 
 (repl/connect "ws://localhost:9001" :verbose true)
-
-
-(defn document-id-from-token [token]
-  (second (re-find #"/doc/(.+)" token)))
-
-
-
-
-(defn random-id []
-  (apply str (take 8 (shuffle "0123456789abcdef"))))
 
 (def config (resolve-config))
 
@@ -33,16 +25,11 @@
             :del  false
             :ts   1412200223710}]}))
 
-(defn sync! [k r o n]
-  (let [data {:old (:data o) :new (:data n)}]
-    (when (not= (:old data) (:new data))
-      (.setItem js/localStorage (name (:name @app-state)) (pr-str (:new data))))))
 
-(add-watch app-state :data-store sync!)
 
-(defn restore! []
-  (when-let [data (not-empty (.getItem js/localStorage (name (:name @app-state))))]
-    (swap! app-state assoc-in [:data] (read-string data))))
+(add-watch app-state :data-store local/sync!)
+
+
 
 (defn new-document [& [{:keys [id name text]}]]
   {:id   (or id (random-id))
@@ -118,7 +105,7 @@
         render (fn [view]
                  (render-component [view app-state] root))]
 
-    (restore!)
+    (local/restore! app-state)
 
     (go (while true
           (let [token (<! history/navigation)]
