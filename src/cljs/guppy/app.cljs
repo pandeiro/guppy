@@ -115,10 +115,8 @@
                       :on-change   #(update-doc! id [:text] (u/event-content %))}
                      (:text doc)]]
 
-           :render  (dangerous/live-dangerously
-                     [:div
-                      ^:danger
-                      [:div (markdown/to-html (:text doc))]]))]))))
+           :render (dangerous/live-dangerously
+                    ^:danger [:div (markdown/to-html (:text doc))]))]))))
 
 (defn init
   "A single entrypoint for the application"
