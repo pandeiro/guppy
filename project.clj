@@ -10,7 +10,9 @@
                  [com.googlecode.htmlcompressor/htmlcompressor "1.4"]
                  [com.cemerick/piggieback "0.1.3"]
                  [weasel "0.4.0-SNAPSHOT"]
-                 [reagent "0.4.2"]]
+                 [reagent "0.4.2"]
+                 [clj-webjars "0.9.0"]
+                 [org.webjars/momentjs "2.8.3"]]
 
   :source-paths ["src/clj"]
 
@@ -38,9 +40,11 @@
                             :optimizations    :advanced
                             :pretty-print     false
                             :externs          ["react.js"
-                                               "showdown.min.js"]
+                                               "showdown.min.js"
+                                               "moment-with-locales.js"]
                             :preamble         ["react.min.js"
-                                               "showdown.min.js"]
+                                               "showdown.min.js"
+                                               "moment-with-locales.min.js"]
                             :closure-warnings {:externs-validation :off
                                                :non-standard-jsdoc :off}}}]}
 
