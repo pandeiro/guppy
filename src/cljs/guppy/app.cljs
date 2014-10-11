@@ -122,24 +122,25 @@
           (change-view :render)]
 
          (case (:view @options)
-           :raw    (with-meta
-                     [:div
-                      [:p (pr-str doc)]]
-                     {:component-did-mount #(.log js/console "got a raw deal")})
+           :raw
+           [:div
+            [:p (pr-str doc)]]
 
-           :edit   [:div
-                    [:h3
-                     {:content-editable true
-                      :placeholder "name"
-                      :on-key-up   #(update-doc! id [:name] (u/headline-content %))}
-                     (or (not-empty (:name doc)) "untitled")]
-                    [:textarea
-                     {:placeholder "Document text goes here..."
-                      :on-change   #(update-doc! id [:text] (u/event-content %))}
-                     (:text doc)]]
+           :edit
+           [:div
+            [:h3
+             {:content-editable true
+              :placeholder "name"
+              :on-key-up   #(update-doc! id [:name] (u/headline-content %))}
+             (or (not-empty (:name doc)) "untitled")]
+            [:textarea
+             {:placeholder "Document text goes here..."
+              :on-change   #(update-doc! id [:text] (u/event-content %))}
+             (:text doc)]]
 
-           :render (dangerous/live-dangerously
-                    ^:danger [:div (markdown/to-html (:text doc))]))]))))
+           :render
+           (dangerous/live-dangerously
+            ^:danger [:div (markdown/to-html (:text doc))]))]))))
 
 (def sources (r/atom []))
 
@@ -156,13 +157,14 @@
 (defn load-video [this]
   (let [video (.querySelector (r/dom-node this) "video")]
     (media/get-sources (fn [items]
-                         (swap! sources conj (media/get-source :environment items))))
+                         (swap! sources conj
+                                (media/get-source :environment items))))
     (.webkitGetUserMedia js/navigator
-     media/hd-constraints
-     (fn [stream]
-       (set! (.-src video) (media/object-url stream)))
-     (fn [error]
-       ))))
+                         media/hd-constraints
+                         (fn [stream]
+                           (set! (.-src video) (media/object-url stream)))
+                         (fn [error]
+                           ))))
 
 (defn init
   "A single entrypoint for the application"
