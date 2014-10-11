@@ -10,7 +10,6 @@
             [guppy.local :as local]
             [guppy.markdown :as markdown]
             [guppy.media :as media]
-            [guppy.dangerous :as dangerous]
             [guppy.util :as u]))
 
 (repl/connect "ws://localhost:9001" :verbose true)
