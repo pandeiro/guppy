@@ -135,12 +135,14 @@
              (or (not-empty (:name doc)) "untitled")]
             [:textarea
              {:placeholder "Document text goes here..."
-              :on-change   #(update-doc! id [:text] (u/event-content %))}
-             (:text doc)]]
+              :on-change   #(update-doc! id [:text] (u/event-content %))
+              :default-value (:text doc)}]]
 
            :render
-           (dangerous/live-dangerously
-            ^:danger [:div (markdown/to-html (:text doc))]))]))))
+           (let [html (markdown/to-html (:text doc))]
+             [:div
+              [:section
+               {:dangerouslySetInnerHTML {:__html html}}]]))]))))
 
 (def sources (r/atom []))
 
