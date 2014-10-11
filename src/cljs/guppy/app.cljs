@@ -7,6 +7,7 @@
             [reagent.core :as r :refer [render-component]]
             [weasel.repl :as repl]
             [guppy.history :as history]
+            [guppy.geolocation :as geo]
             [guppy.local :as local]
             [guppy.markdown :as markdown]
             [guppy.media :as media]
@@ -112,7 +113,14 @@
                       [:button
                        {:on-click (fn [e] (swap! options assoc :view k))
                         :class (if (= k (:view @options)) "active")}
-                       (name k)])]
+                       (name k)])
+        logging-position (atom false)
+        log-or-stop-logging-position
+        (fn [e]
+          (if @logging-position
+            (do (geo/clear-watch @logging-position)
+                (reset! logging-position false))
+            ))]
     (fn []
       (let [id   (u/document-id-from-token (history/current-token))
             doc  (u/doc-by-id (:data @state) id)]
@@ -120,7 +128,10 @@
          [:div
           (change-view :raw)
           (change-view :edit)
-          (change-view :render)]
+          (change-view :render)
+          [:button
+           {:on-click log-or-stop-logging-position}
+           (if @logging-position "Stop Geo" "Log Geo")]]
 
          (case (:view @options)
            :raw
