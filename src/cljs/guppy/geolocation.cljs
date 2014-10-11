@@ -12,7 +12,7 @@
     {:latitude          (.-latitude coords)
      :longitude         (.-longitude coords)
      :accuracy          (.-accuracy coords)
-     :altitude          (.-altitude ccords)
+     :altitude          (.-altitude coords)
      :altitude-accuracy (.-altitudeAccuracy coords)
      :heading           (.-heading coords)
      :speed             (.-speed coords)
