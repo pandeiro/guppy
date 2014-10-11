@@ -196,7 +196,7 @@
                                    {:component-did-mount load-video}))
               #".*"      (render list-view)))))
 
-    (.locale js/moment "pt-br")
+    (.locale js/moment (:lang (:opts @app-state)))
     ))
 
 (.addEventListener js/window "DOMContentLoaded" init)
