@@ -14,29 +14,31 @@
 
 (repl/connect "ws://localhost:9001" :verbose true)
 
-(def config (resolve-config))
-
 (def root (.getElementById js/document "root"))
 
 (def app-state
   (r/atom
-   {:name :guppy
-    :view :main
-    :opts {}
-    :data [{:id   "9a6ecd57"
-            :name "welcome"
-            :text "# This is a document"
-            :del  false
-            :ts   1412200223710}]}))
+   {:name   :guppy
+    :config (resolve-config)
+    :view   :main
+    :opts   {:lang "en" ; en | pt-br
+             }
+    :data   [{:id   "9a6ecd57"
+              :name "welcome"
+              :text "# This is a document"
+              :del  false
+              :ts   1412200223710}]}))
 
 (add-watch app-state :data-store local/sync!)
 
 (defn new-document [& [{:keys [id name text]}]]
-  {:id   (or id (u/random-id))
-   :name (or name "")
-   :text (or text "")
-   :del  false
-   :ts   (.getTime (js/Date.))})
+  (let [now (.getTime (js/Date.))]
+    {:id      (or id (u/random-id))
+     :name    (or name "")
+     :text    (or text "")
+     :del     false
+     :created now
+     :ts      now}))
 
 (defn add-document []
   (swap! app-state update-in [:data] conj (new-document)))
