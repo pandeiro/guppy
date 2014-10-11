@@ -42,12 +42,27 @@
 (defn add-document []
   (swap! app-state update-in [:data] conj (new-document)))
 
+(defn modal [& content]
+  [:div
+   {:style {:position "fixed"
+            :top 0, :left 0, :right 0, :bottom 0
+            :z-index 1000}}
+   content])
+
 (defn list-view [state]
   [:div
    [:button
     {:on-click (fn [e]
                  (let [id (u/random-id)]
-                   (history/set-token! (str "/doc/" id))))}
+                   (r/render-component
+                    [modal
+                     [:button
+                      {:on-click #(history/set-token! (str "/doc/" id))}
+                      "doc"]
+                     [:button
+                      {:on-click #(history/set-token! (str "/video"))}
+                      "cam"]]
+                    root)))}
     "+"]
    [:button
     {:on-click (fn [e] (history/set-token! "/video"))}
@@ -152,7 +167,7 @@
 (defn init
   "A single entrypoint for the application"
   []
-        render (fn [view]
+  (let [render (fn [view]
                  (render-component [view app-state] root))]
 
     (local/restore! app-state)
