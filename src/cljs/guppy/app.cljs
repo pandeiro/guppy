@@ -93,7 +93,7 @@
   [id path value]
   (fn [state]
     (merge state
-      {:data 
+      {:data
        (if (u/doc-by-id (:data state) id)
          (map (partial replace-doc id path value)
            (:data state))
