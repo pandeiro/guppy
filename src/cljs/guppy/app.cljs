@@ -17,6 +17,8 @@
 
 (def config (resolve-config))
 
+(def root (.getElementById js/document "root"))
+
 (def app-state
   (r/atom
    {:name :guppy
@@ -150,7 +152,6 @@
 (defn init
   "A single entrypoint for the application"
   []
-  (let [root   (.getElementById js/document "root")
         render (fn [view]
                  (render-component [view app-state] root))]
 
