@@ -111,32 +111,44 @@
 (defn update-doc! [id path value]
   (swap! app-state (updater id path value)))
 
-
 (defn document-view [state]
   (let [options (r/atom {:view :edit})
-        change-view (fn [k]
-                      [:button
-                       {:on-click (fn [e] (swap! options assoc :view k))
-                        :class (if (= k (:view @options)) "active")}
-                       (name k)])
-        logging-position (atom false)
-        log-or-stop-logging-position
-        (fn [e]
-          (if @logging-position
-            (do (geo/clear-watch @logging-position)
-                (reset! logging-position false))
-            ))]
+        change-view
+        (fn [k]
+          [:button
+           {:on-click (fn [e] (swap! options assoc :view k))
+            :class (if (= k (:view @options)) "active")}
+           (name k)])
+        toggle-geo
+        (fn [id]
+          (fn [e]
+            (if (get-in @state [:geo-logging id])
+              (do
+                (geo/clear-watch (get (:geo-logging @state) id))
+                (swap! state update-in [:geo-logging] dissoc id))
+              (do
+                (swap! state update-in [:geo-logging] assoc id
+                  (geo/watch-position
+                   (fn [pos]
+                     (let [prev-vals (getter id [:geo])]
+                       (update-doc! id [:geo]
+                         (conj (prev-vals @state) pos))))))))))]
     (fn []
       (let [id   (u/document-id-from-token (history/current-token))
             doc  (u/doc-by-id (:data @state) id)]
         [:div
          [:div
+          [:button
+           {:on-click (fn [e] (update-doc! id [:del] true))}
+           "x"]
           (change-view :raw)
           (change-view :edit)
           (change-view :render)
+          (change-view :map)
           [:button
-           {:on-click log-or-stop-logging-position}
-           (if @logging-position "Stop Geo" "Log Geo")]]
+           {:on-click (toggle-geo id)
+            :class (if (get-in @state [:geo-logging id]) "on")}
+           "geo"]]
 
          (case (:view @options)
            :raw
@@ -155,6 +167,8 @@
               :on-change   #(update-doc! id [:text] (u/event-content %))
               :default-value (:text doc)}]]
 
+           :map
+           [leaf/map-component :leaf]
            :render
            (let [html (markdown/to-html (:text doc))]
              [:div
