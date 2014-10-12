@@ -140,11 +140,11 @@
 
            :edit
            [:div
-            [:h3
-             {:content-editable true
-              :placeholder "name"
-              :on-key-up   #(update-doc! id [:name] (u/headline-content %))}
-             (or (not-empty (:name doc)) "untitled")]
+            [:p "Last edit: " (.fromNow (js/moment (:ts doc)))]
+            [:input
+             {:placeholder "name"
+              :on-change #(update-doc! id [:name] (u/event-content %))
+              :default-value (:name doc)}]
             [:textarea
              {:placeholder "Document text goes here..."
               :on-change   #(update-doc! id [:text] (u/event-content %))
