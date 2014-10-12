@@ -88,6 +88,11 @@
       (assoc-in [:ts] (.getTime (js/Date.))))
     doc))
 
+(defn getter
+  [id path]
+  (fn [{data :data}]
+    (get-in (first (filter #(= id (:id %)) data)) path)))
+
 (defn updater
   "Updates a map 'in place' within a sequence according to the
   id and path, sticking value there. Creates the map if one
