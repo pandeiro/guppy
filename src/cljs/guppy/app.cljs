@@ -54,30 +54,26 @@
 (defn list-view [state]
   [:div
    [:button
-    {:on-click (fn [e]
-                 (let [id (u/random-id)]
-                   (r/render-component
-                    [modal
-                     [:button
-                      {:on-click #(history/set-token! (str "/doc/" id))}
-                      "doc"]
-                     [:button
-                      {:on-click #(history/set-token! (str "/video"))}
-                      "cam"]]
-                    root)))}
+    {:on-click #(history/set-token! (str "/doc/" (u/random-id)))}
     "+"]
-   [:button
-    {:on-click (fn [e] (history/set-token! "/video"))}
-    "cam"]
    [:ol
-    (for [doc (reverse (sort-by :ts (:data @state)))]
-      ^{:key (:id doc)}
-      [:li
-       [:a
-        {:href (str "#/doc/" (:id doc))}
-        [:span (.fromNow (js/moment (:ts doc)))]
-        " - "
-        [:span [:strong (:name doc)]]]])]])
+    (let [removers (map (fn [[k v]] #(= (k %) v)) (get-in @state [:opts :remove]))
+          remover  (partial remove (apply some-fn removers))
+          sorter   (partial sort-by (get-in @state [:opts :sort]))
+          reverser (if (get-in @state [:opts :reverse?]) reverse identity)
+
+          docs     (-> (:data @state)
+                     remover
+                     sorter
+                     reverser)]
+
+      (for [doc docs]
+        ^{:key (:id doc)}
+        [:li
+         [:a
+          {:href (str "#/doc/" (:id doc))}
+          [:span [:strong (or (not-empty (:name doc)) "untitled")]]
+          " (" [:span (.fromNow (js/moment (:created doc)))] ")"]]))]])
 
 
 
