@@ -17,32 +17,40 @@
 
 (def root (.getElementById js/document "root"))
 
+(def sorting-keys #{:name :created :ts :text})
+
 (def app-state
   (r/atom
-   {:name   :guppy
-    :config (resolve-config)
-    :view   :main
-    :opts   {:lang "en" ; en | pt-br
-             }
-    :data   [{:id   "9a6ecd57"
-              :name "welcome"
-              :text "# This is a document"
-              :del  false
-              :ts   1412200223710}]}))
+   {:name        :guppy
+    :config      (resolve-config)
+    :view        :main
+    :geo-logging nil
+    :opts        {:lang "en" ; en | pt-br
+                  :sort :created
+                  :remove {:del true}}
+    :data        [{:id   "9a6ecd57"
+                   :name "welcome"
+                   :text "# This is a document"
+                   :del  false
+                   :ts   1412200223710}]}))
 
 (add-watch app-state :data-store local/sync!)
 
-(defn new-document [& [{:keys [id name text]}]]
+(defn new-document [& [{:keys [id from name created ts text geo]}]]
   (let [now (.getTime (js/Date.))]
     {:id      (or id (u/random-id))
-     :name    (or name "")
-     :text    (or text "")
+     :from    from
      :del     false
-     :created now
-     :ts      now}))
+     :name    (or name "")
+     :created (or created now)
+     :ts      (or ts now)
 
-(defn add-document []
-  (swap! app-state update-in [:data] conj (new-document)))
+     :text    (or text "")
+
+     :geo     (or geo [])}))
+
+(defn add-document [& [data]]
+  (swap! app-state update-in [:data] conj (new-document data)))
 
 (defn modal [& content]
   [:div
