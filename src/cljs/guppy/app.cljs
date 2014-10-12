@@ -1,5 +1,5 @@
 (ns guppy.app
-  (:require-macros [cljs.core.async.macros :refer [go]]
+  (:require-macros [cljs.core.async.macros :refer [go go-loop]]
                    [guppy.config :refer [resolve-config]])
   (:require [goog.events :as ev]
             [cljs.core.async :as async :refer [chan put! <! >!]]
@@ -173,18 +173,35 @@
     (media/get-sources (fn [items]
                          (swap! sources conj
                                 (media/get-source :environment items))))
-    (.webkitGetUserMedia js/navigator
-                         media/hd-constraints
-                         (fn [stream]
-                           (set! (.-src video) (media/object-url stream)))
-                         (fn [error]
-                           ))))
+    (.webkitGetUserMedia
+     js/navigator
+     media/hd-constraints
+     (fn [stream]
+       (set! (.-src video) (media/object-url stream)))
+     (fn [error]
+       ))))
 
 (defn init
   "A single entrypoint for the application"
   []
   (let [render (fn [view]
-                 (render-component [view app-state] root))]
+                 (render-component [view app-state] root))
+
+        list-view (with-meta
+                    list-view
+                    (let [kill (chan)]
+                      {:component-did-mount
+                       (fn [this]
+                         (go-loop [kill? false]
+                           (let [[v c] (async/alts!
+                                        [(async/timeout 5000) kill])]
+                             (when (.isMounted this)
+                               (.log js/console "updating list view comp")
+                               (.forceUpdate this))
+                             (recur (if (= c kill) true)))))
+                       :component-will-unmount
+                       (fn [this]
+                         (put! kill :kill))}))]
 
     (local/restore! app-state)
 
