@@ -8,6 +8,7 @@
             [weasel.repl :as repl]
             [guppy.history :as history]
             [guppy.geolocation :as geo]
+            [guppy.leaf :as leaf]
             [guppy.local :as local]
             [guppy.markdown :as markdown]
             [guppy.media :as media]
