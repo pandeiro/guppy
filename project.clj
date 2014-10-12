@@ -12,7 +12,8 @@
                  [weasel "0.4.0-SNAPSHOT"]
                  [reagent "0.4.2"]
                  [clj-webjars "0.9.0"]
-                 [org.webjars/momentjs "2.8.3"]]
+                 [org.webjars/momentjs "2.8.3"]
+                 [org.webjars/leaflet "0.7.3"]]
 
   :source-paths ["src/clj"]
 
@@ -41,10 +42,12 @@
                             :pretty-print     false
                             :externs          ["react.js"
                                                "showdown.min.js"
-                                               "moment-with-locales.js"]
+                                               "moment-with-locales.js"
+                                               "leaflet.js"]
                             :preamble         ["react.min.js"
                                                "showdown.min.js"
-                                               "moment-with-locales.min.js"]
+                                               "moment-with-locales.min.js"
+                                               "leaflet.min.js"]
                             :closure-warnings {:externs-validation :off
                                                :non-standard-jsdoc :off}}}]}
 
