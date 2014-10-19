@@ -213,8 +213,6 @@
           (let [token (<! history/navigation)]
             (condp re-find token
               #"/doc/.+" (render document-view)
-              #"/video"  (render (with-meta video-view
-                                   {:component-did-mount load-video}))
               #".*"      (render list-view)))))
 
     (.locale js/moment (:lang (:opts @app-state)))
