@@ -17,3 +17,6 @@
   [data id]
   (let [x (first (filter #(= (:id %) id) data))]
     x))
+
+(defn relative-height [h pct]
+  {:height (str (* h pct) "px")})

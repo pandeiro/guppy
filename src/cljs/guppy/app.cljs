@@ -77,10 +77,15 @@
       (for [doc docs]
         ^{:key (:id doc)}
         [:li
+         {:style {:line-height "1.75em"}}
          [:a
-          {:href (str "#/doc/" (:id doc))}
+          {:href (str "#/doc/" (:id doc))
+           :style {:text-decoration "none"}}
           [:span [:strong (or (not-empty (:name doc)) "untitled")]]
-          " (" [:span (.fromNow (js/moment (:created doc)))] ")"]]))]])
+          [:span
+           {:style {:padding-left "6px"
+                    :text-decoration "none"}}
+           (.format (js/moment (:created doc)) "L")]]]))]])
 
 
 
@@ -138,9 +143,15 @@
                          (conj (prev-vals @state) pos))))))))))]
     (fn []
       (let [id   (u/document-id-from-token (history/current-token))
-            doc  (u/doc-by-id (:data @state) id)]
+            doc  (u/doc-by-id (:data @state) id)
+            h    (get-in @state [:viewport :height])]
         [:div
          [:div
+          {:style (merge {:width "100%"
+                          :position "fixed"
+                          :left 0
+                          :top 0}
+                         (u/relative-height h 0.1))}
           [:button
            {:on-click (fn [e] (update-doc! id [:del] true))}
            "x"]
@@ -160,13 +171,22 @@
 
            :edit
            [:div
-            [:p "Last edit: " (.fromNow (js/moment (:ts doc)))]
-            [:input
-             {:placeholder "name"
-              :on-change #(update-doc! id [:name] (u/event-content %))
-              :default-value (:name doc)}]
+            [:div
+             {:style (merge {:margin-top (:height (u/relative-height h 0.1))}
+                            (u/relative-height h 0.2))}
+             [:p "Last edit: " (.fromNow (js/moment (:ts doc)))]
+             [:input
+              {:placeholder "name"
+               :on-change #(update-doc! id [:name] (u/event-content %))
+               :default-value (:name doc)}]]
             [:textarea
              {:placeholder "Document text goes here..."
+              :style (merge {:position "fixed"
+                             :bottom 0
+                             :left 0
+                             :width "100%"
+                             :border "none"}
+                            (u/relative-height h 0.7))
               :on-change   #(update-doc! id [:text] (u/event-content %))
               :default-value (:text doc)}]]
 
