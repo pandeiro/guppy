@@ -25,6 +25,7 @@
    {:name        :guppy
     :config      (resolve-config)
     :view        :main
+    :viewport    {:width nil, :height nil}
     :geo-logging nil
     :opts        {:lang "en" ; en | pt-br
                   :sort :created
@@ -237,3 +238,12 @@
 
 (.addEventListener js/window "DOMContentLoaded" init)
 
+(defn viewport-size-updater [r path]
+  (fn [_]
+    (swap! r assoc-in (conj path :width) (.-innerWidth js/window))
+    (swap! r assoc-in (conj path :height) (.-innerHeight js/window))))
+
+(def viewport-size-handler (viewport-size-updater app-state [:viewport]))
+
+(ev/listen js/window "load" viewport-size-handler)
+(ev/listen js/window "resize" viewport-size-handler)
