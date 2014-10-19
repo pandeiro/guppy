@@ -28,7 +28,8 @@
     :viewport    {:width nil, :height nil}
     :geo-logging nil
     :opts        {:lang "en" ; en | pt-br
-                  :sort :created
+                  :sort :ts
+                  :reverse? true
                   :remove {:del true}}
     :data        []}))
 
