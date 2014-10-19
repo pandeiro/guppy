@@ -29,11 +29,7 @@
     :opts        {:lang "en" ; en | pt-br
                   :sort :created
                   :remove {:del true}}
-    :data        [{:id   "9a6ecd57"
-                   :name "welcome"
-                   :text "# This is a document"
-                   :del  false
-                   :ts   1412200223710}]}))
+    :data        []}))
 
 (add-watch app-state :data-store local/sync!)
 
