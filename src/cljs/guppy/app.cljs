@@ -216,7 +216,6 @@
                            (let [[v c] (async/alts!
                                         [(async/timeout 5000) kill])]
                              (when (.isMounted this)
-                               (.log js/console "updating list view comp")
                                (.forceUpdate this))
                              (recur (if (= c kill) true)))))
                        :component-will-unmount
