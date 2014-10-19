@@ -11,6 +11,7 @@
                  [com.cemerick/piggieback "0.1.3"]
                  [weasel "0.4.0-SNAPSHOT"]
                  [reagent "0.4.2"]
+                 [garden "1.2.3"]
                  [clj-webjars "0.9.0"]
                  [org.webjars/momentjs "2.8.3"]
                  [org.webjars/leaflet "0.7.3"]]
