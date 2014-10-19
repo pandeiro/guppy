@@ -180,6 +180,7 @@
 
            :map
            [leaf/map-component :leaf]
+
            :render
            (let [html (markdown/to-html (:text doc))]
              [:div
