@@ -11,14 +11,11 @@
             [guppy.leaf :as leaf]
             [guppy.local :as local]
             [guppy.markdown :as markdown]
-            [guppy.media :as media]
             [guppy.util :as u]))
 
 (repl/connect "ws://localhost:9001" :verbose true)
 
 (def root (.getElementById js/document "root"))
-
-(def sorting-keys #{:name :created :ts :text})
 
 (def app-state
   (r/atom
@@ -51,13 +48,6 @@
 (defn add-document [& [data]]
   (swap! app-state update-in [:data] conj (new-document data)))
 
-(defn modal [& content]
-  [:div
-   {:style {:position "fixed"
-            :top 0, :left 0, :right 0, :bottom 0
-            :z-index 1000}}
-   content])
-
 (defn list-view [state]
   [:div
    [:button
@@ -86,8 +76,6 @@
            {:style {:padding-left "6px"
                     :text-decoration "none"}}
            (.format (js/moment (:created doc)) "L")]]]))]])
-
-
 
 (defn replace-doc [id path value doc]
   (if (= id (:id doc))
@@ -197,31 +185,6 @@
              [:div
               [:section
                {:dangerouslySetInnerHTML {:__html html}}]]))]))))
-
-(def sources (r/atom []))
-
-(defn video-view []
-  (let []
-    (fn []
-      [:div
-       [:p "Sources"]
-       [:span
-        (pr-str @sources)]
-       [:p "Video"]
-       [:video {:auto-play true}]])))
-
-(defn load-video [this]
-  (let [video (.querySelector (r/dom-node this) "video")]
-    (media/get-sources (fn [items]
-                         (swap! sources conj
-                                (media/get-source :environment items))))
-    (.webkitGetUserMedia
-     js/navigator
-     media/hd-constraints
-     (fn [stream]
-       (set! (.-src video) (media/object-url stream)))
-     (fn [error]
-       ))))
 
 (defn init
   "A single entrypoint for the application"
