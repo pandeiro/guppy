@@ -96,13 +96,13 @@
   [id path value]
   (fn [state]
     (merge state
-      {:data
-       (if (u/doc-by-id (:data state) id)
-         (map (partial replace-doc id path value)
-           (:data state))
-         (conj (:data state)
-           (assoc-in (new-document {:id id})
-             path value)))})))
+           {:data
+            (if (u/doc-by-id (:data state) id)
+              (map (partial replace-doc id path value)
+                   (:data state))
+              (conj (:data state)
+                    (assoc-in (new-document {:id id})
+                              path value)))})))
 
 (defn update-doc! [id path value]
   (swap! app-state (updater id path value)))
