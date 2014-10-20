@@ -107,6 +107,40 @@
 (defn update-doc! [id path value]
   (swap! app-state (updater id path value)))
 
+(defn edit-view [state options id doc]
+  (let []
+    (r/create-class
+     {:render
+      (fn []
+        (let [h (get-in @state [:viewport :height])]
+          [:div
+           [:div
+            {:style (merge {:margin-top (:height (u/relative-height h 0.1))}
+                           (u/relative-height h 0.2))}
+            [:p "Last edit: " (.fromNow (js/moment (:ts doc)))]
+            [:input#doc-name
+             {:placeholder "name"
+              :on-change #(update-doc! id [:name] (u/event-content %))
+              :default-value (:name doc)}]]
+           [:textarea
+            {:placeholder "Document text goes here..."
+             :style (merge {:position "fixed"
+                            :bottom 0
+                            :left 0
+                            :width "100%"
+                            :border "none"}
+                           (u/relative-height h 0.7))
+             :on-change   #(update-doc! id [:text] (u/event-content %))
+             :default-value (:text doc)}]]))})))
+
+(defn render-markdown-view [doc]
+  (let [html (markdown/to-html (:text doc))]
+    [:div
+     [:section
+      {:dangerouslySetInnerHTML {:__html html}}]]))
+
+(defn raw-view [doc]
+  [:div [:p (pr-str doc)]])
 (defn document-view [state]
   (let [options (r/atom {:view :edit})
         change-view
