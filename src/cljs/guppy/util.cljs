@@ -20,3 +20,13 @@
 
 (defn relative-height [h pct]
   {:height (str (* h pct) "px")})
+
+(defn swiped-to [touches]
+  (let [x-diff (- (:x (first touches)) (:x (last touches)))]
+    (cond (pos? x-diff) :right
+          (neg? x-diff) :left)))
+
+(defn get-touch-coords [e]
+  (let [touch (aget (.-touches (.getBrowserEvent e)) 0)]
+    {:x (.-screenX touch) :y (.-screenY touch)}))
+

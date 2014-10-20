@@ -141,8 +141,17 @@
 
 (defn raw-view [doc]
   [:div [:p (pr-str doc)]])
+
+(def swipes
+  {:raw {:left nil :right :edit}
+   :edit {:left :raw :right :render}
+   :render {:left :edit :right :map}
+   :map {:left :render :right nil}})
+
 (defn document-view [state]
   (let [options (r/atom {:view :edit})
+        touchmove-listener (atom nil)
+        touchend-listener (atom nil)
         change-view
         (fn [k]
           [:button
@@ -158,68 +167,62 @@
                 (swap! state update-in [:geo-logging] dissoc id))
               (do
                 (swap! state update-in [:geo-logging] assoc id
-                  (geo/watch-position
-                   (fn [pos]
-                     (let [prev-vals (getter id [:geo])]
-                       (update-doc! id [:geo]
-                         (conj (prev-vals @state) pos))))))))))]
-    (fn []
-      (let [id   (u/document-id-from-token (history/current-token))
-            doc  (u/doc-by-id (:data @state) id)
-            h    (get-in @state [:viewport :height])]
-        [:div
-         [:div
-          {:style (merge {:width "100%"
-                          :position "fixed"
-                          :left 0
-                          :top 0}
-                         (u/relative-height h 0.1))}
-          [:button
-           {:on-click (fn [e] (update-doc! id [:del] true))}
-           "x"]
-          (change-view :raw)
-          (change-view :edit)
-          (change-view :render)
-          (change-view :map)
-          [:button
-           {:on-click (toggle-geo id)
-            :class (if (get-in @state [:geo-logging id]) "on")}
-           "geo"]]
-
-         (case (:view @options)
-           :raw
+                       (geo/watch-position
+                        (fn [pos]
+                          (let [prev-vals (getter id [:geo])]
+                            (update-doc! id [:geo]
+                                         (conj (prev-vals @state) pos))))))))))]
+    (r/create-class
+     {:render
+      (fn []
+        (let [id   (u/document-id-from-token (history/current-token))
+              doc  (u/doc-by-id (:data @state) id)
+              h    (get-in @state [:viewport :height])]
+          [:div
            [:div
-            [:p (pr-str doc)]]
+            [:button
+             {:on-click (fn [e] (update-doc! id [:del] true))}
+             "x"]
+            (change-view :raw)
+            (change-view :edit)
+            (change-view :render)
+            (change-view :map)
+            [:button
+             {:on-click (toggle-geo id)
+              :class (if (get-in @state [:geo-logging id]) "on")}
+             "geo"]]
 
-           :edit
-           [:div
-            [:div
-             {:style (merge {:margin-top (:height (u/relative-height h 0.1))}
-                            (u/relative-height h 0.2))}
-             [:p "Last edit: " (.fromNow (js/moment (:ts doc)))]
-             [:input
-              {:placeholder "name"
-               :on-change #(update-doc! id [:name] (u/event-content %))
-               :default-value (:name doc)}]]
-            [:textarea
-             {:placeholder "Document text goes here..."
-              :style (merge {:position "fixed"
-                             :bottom 0
-                             :left 0
-                             :width "100%"
-                             :border "none"}
-                            (u/relative-height h 0.7))
-              :on-change   #(update-doc! id [:text] (u/event-content %))
-              :default-value (:text doc)}]]
-
-           :map
-           [leaf/map-component :leaf]
-
-           :render
-           (let [html (markdown/to-html (:text doc))]
-             [:div
-              [:section
-               {:dangerouslySetInnerHTML {:__html html}}]]))]))))
+           (case (:view @options)
+             :raw
+             [raw-view doc]
+             :edit
+             [edit-view state options id doc]
+             :map
+             [leaf/map-component :leaf]
+             :render
+             [render-markdown-view doc])]))
+      :component-did-mount
+      (fn [_]
+        (let [ts (atom nil)
+              name-input (.getElementById js/document "doc-name")
+              on-touch (partial ev/listen js/window "touchmove")
+              on-touch-end (partial ev/listen js/window "touchend")]
+          (ev/listen name-input "focus" #(.add (.-classList root) "editing-title"))
+          (ev/listen name-input "blur" #(.remove (.-classList root) "editing-title"))
+          (reset! touchmove-listener (on-touch #(swap! ts conj (u/get-touch-coords %))))
+          (reset!
+           touchend-listener
+           (on-touch-end
+            (fn [e]
+              (let [view (:view @options)
+                    direction (u/swiped-to @ts)]
+                (when-let [new-view (get-in swipes [view direction])]
+                  (swap! options assoc :view new-view))
+                (reset! ts nil)))))))
+      :component-will-unmount
+      (fn [_]
+        (ev/unlistenByKey @touchmove-listener)
+        (ev/unlistenByKey @touchend-listener))})))
 
 (defn init
   "A single entrypoint for the application"
